@@ -5,15 +5,12 @@ import android.content.SharedPreferences;
 
 public class SharedPref {
     private static SharedPreferences mSharedPref;
-    public static final String NAME = "NAME";
-    public static final String AGE = "AGE";
-    public static final String IS_SELECT = "IS_SELECT";
 
     private SharedPref() {
 
     }
 
-    public static void init(Context context) {
+    static void init(Context context) {
         if (mSharedPref == null)
             mSharedPref = context.getSharedPreferences(context.getPackageName(), context.MODE_PRIVATE);
     }

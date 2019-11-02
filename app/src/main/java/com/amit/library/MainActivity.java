@@ -22,82 +22,14 @@ import java.util.ArrayList;
 import java.util.Date;
 
 public class MainActivity extends AppCompatActivity {
-    private EditText ageText, weightText, heightText;
     private Button button, button1, button2, button3, button4, button5, button6, button7, temp, hrv;
-    private long signal = 100;
-    private long hrm = 390;
-    private long time_sec = 11213;
-    private long time_ms = 123141;
-    private long cadence = 20;
-    private long steps = 1000;
-    private long vo2 = 500;
-    private long calories = 2540;
-    private long entry_time;
-    int inc = 0;
-    private String date;
-    long[][] arr = {{0, 70, 7, 880, 0, 4, 35, 0},
-            {56, 69, 8, 880, 0, 4, 35, 0},
-            {80, 67, 9, 800, 99, 4, 35, 0},
-            {83, 62, 12, 840, 90, 4, 29, 0},
-            {45, 61, 13, 760, 0, 4, 29, 0},
-            {90, 60, 14, 880, 50, 4, 29, 0},
-            {59, 60, 15, 800, 0, 4, 29, 0},
-            {81, 60, 16, 800, 0, 4, 29, 0},
-            {82, 61, 17, 800, 0, 4, 29, 0},
-            {96, 61, 18, 760, 0, 4, 29, 0},
-            {100, 62, 19, 720, 0, 4, 29, 0},
-            {100, 62, 20, 640, 0, 4, 29, 0},
-            {100, 62, 21, 640, 0, 4, 29, 0},
-            {100, 62, 22, 600, 0, 4, 29, 0},
-            {80, 62, 12, 840, 90, 4, 29, 0},
-            {80, 61, 13, 760, 0, 4, 29, 0},
-            {80, 63, 52, 600, 90, 14, 29, 0},
-            {80, 65, 53, 240, 0, 16, 29, 0},
-            {44, 65, 54, 0, 0, 16, 29, 0},
-            {0, 62, 22, 600, 0, 4, 29, 0},
-            {47, 62, 12, 840, 90, 4, 29, 0},
-            {45, 61, 13, 760, 0, 4, 29, 0},
-            {45, 60, 14, 880, 50, 4, 29, 0},
-            {59, 60, 15, 800, 0, 4, 29, 0},
-            {59, 60, 16, 800, 0, 4, 29, 0},
-            {82, 61, 17, 800, 0, 4, 29, 0},
-            {96, 61, 18, 760, 0, 4, 29, 0},
-            {100, 62, 19, 720, 0, 4, 29, 0},
-            {100, 62, 20, 640, 0, 4, 29, 0},
-            {100, 62, 21, 640, 0, 4, 29, 0},
-            {100, 62, 22, 600, 0, 4, 29, 0},
-            {100, 62, 23, 560, 0, 4, 29, 0},
-            {89, 67, 56, 80, 0, 16, 29, 0},
-            {89, 67, 56, 760, 0, 16, 29, 0},
-            {100, 62, 20, 640, 0, 4, 29, 0},
-            {100, 62, 21, 640, 0, 4, 29, 0},
-            {100, 62, 22, 600, 0, 4, 29, 0},
-            {47, 62, 12, 840, 90, 4, 29, 0},
-            {45, 61, 13, 760, 0, 4, 29, 0},
-            {45, 60, 14, 880, 50, 4, 29, 0},
-            {59, 60, 15, 800, 0, 4, 29, 0},
-            {59, 60, 16, 800, 0, 4, 29, 0},
-            {82, 61, 17, 800, 0, 4, 29, 0},
-            {96, 61, 18, 760, 0, 4, 29, 0},
-            {0, 70, 7, 880, 0, 4, 35, 0},
-            {56, 69, 8, 880, 0, 4, 35, 0},
-            {56, 67, 9, 800, 99, 4, 35, 0},
-            {47, 62, 12, 840, 90, 4, 29, 0},
-            {45, 61, 13, 760, 0, 4, 29, 0},
-            {45, 60, 14, 880, 50, 4, 29, 0},
-            {59, 60, 15, 800, 0, 4, 29, 0},
-            {59, 60, 16, 800, 0, 4, 29, 0},
-            {82, 61, 17, 800, 0, 4, 29, 0},};
 
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        //ageText = findViewById(R.id.editText);
-        //weightText = findViewById(R.id.editText2);
-        //heightText = findViewById(R.id.editText3);
-        button = findViewById(R.id.button);
+         button = findViewById(R.id.button);
         button1 = findViewById(R.id.button2);
         button2 = findViewById(R.id.button3);
         button3 = findViewById(R.id.button4);
@@ -108,8 +40,6 @@ public class MainActivity extends AppCompatActivity {
         temp = findViewById(R.id.temp);
         hrv = findViewById(R.id.getHRV);
 
-        Log.d("cronovo", "" + arr[0][1]);
-        Log.d("cronovo", "" + arr[1][2]);
 
 
         button7.setOnClickListener(new View.OnClickListener() {
@@ -223,8 +153,6 @@ public class MainActivity extends AppCompatActivity {
                     Log.d("cronovo", "" + userDetailsArrayList.get(j).getDate());
 
                 }
-
-
             }
         });
 
@@ -240,7 +168,7 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 DataBase db = DataBase.getInstance(MainActivity.this);
-                double cardiacEfficieny = new Cronovo().getCardiacEfficieny(Cronovo.TimePeriod.DAILY, MainActivity.this);
+                double cardiacEfficieny = new Cronovo().getCardiacEfficiency(Cronovo.TimePeriod.DAILY, MainActivity.this);
                 Log.d("cronovo", "" + cardiacEfficieny);
             }
         });

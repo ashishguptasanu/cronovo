@@ -5,13 +5,12 @@ import android.util.Log;
 import java.time.Instant;
 import java.util.ArrayList;
 
-public class LibraryMethods {
+class LibraryMethods {
     private static double previousCT = 37;
     private static double previousVariance = 0;
 
-    static double calculateCaridacEfficiency(Cronovo.TimePeriod timePeriod, DataBase dataBase) {
+    static double calculateCardiacEfficiency(Cronovo.TimePeriod timePeriod, DataBase dataBase) {
         Log.d("cronovo", "timeperiod" + timePeriod.getTimePeriod());
-        // DataBase dataBaseHelper = DataBase.getInstance(context);
         double cardiacEfficiency = 0;
         ArrayList<UserDetails> userDetailsArrayList = dataBase.getUserDetails(Instant.now().getEpochSecond() - timePeriod.getTimePeriod(), Instant.now().getEpochSecond());
         if (userDetailsArrayList.size() == 0) {
@@ -32,7 +31,6 @@ public class LibraryMethods {
         Log.d("cronovo", "time" + recoveryTime.getRecoveryTime());
         String currentDate = Helper.getCurrentDate();
         double heart_rate_recovery = 0;
-        /* DataBase dataBase = DataBase.getInstance(context); */
         ArrayList<UserDetails> minHRArrayList = dataBase.getUserMinHrDetails(currentDate);
         ArrayList<UserDetails> maxHRArrayList = dataBase.getUserMaxHrDetails(currentDate);
         if (maxHRArrayList.size() == 0) {
@@ -48,7 +46,6 @@ public class LibraryMethods {
             if (userDetailsArrayList.size() == 0) {
                 Log.d("cronovo", "insufficent data");
                 heart_rate_recovery = -1;
-                ;
             } else {
                 long hrRest = minHRArrayList.get(0).getHrm();
                 Log.d("cronovo", "hRR hrRest" + hrRest);
@@ -71,7 +68,6 @@ public class LibraryMethods {
     static double calculateRestingHr(DataBase dataBase) {
         long to = Instant.now().getEpochSecond();
         long from = to - 60;
-        // DataBase dataBase = DataBase.getInstance(context);
         ArrayList<UserDetails> userDetailsArrayList = dataBase.getUserDetails(from, to);
         Log.d("cronovo", "list size at resting hr" + userDetailsArrayList);
         if (userDetailsArrayList.size() == 0) {
@@ -120,7 +116,7 @@ public class LibraryMethods {
         return CoreTemp;
     }
 
-    public static double calculateVO2MAX(DataBase dataBase) {
+    static double calculateVO2MAX(DataBase dataBase) {
         double vo2_max;
         double hr_rest = LibraryMethods.calculateRestingHr(dataBase);
         if (hr_rest == -1)
@@ -139,7 +135,7 @@ public class LibraryMethods {
         return vo2_max;
     }
 
-    public static double calculateRRI(DataBase dataBase) {
+    static double calculateRRI(DataBase dataBase) {
         double result;
         ArrayList<UserDetails> userDetailsArrayList = dataBase.getUserDetails(DataBase.readQueryRRi);
         if (userDetailsArrayList.size() == 0)
@@ -148,20 +144,20 @@ public class LibraryMethods {
             double value1 = userDetailsArrayList.get(1).getTime_sec() + (double) userDetailsArrayList.get(1).getTime_ms() / 1000;
             double value2 = userDetailsArrayList.get(0).getTime_sec() + (double) userDetailsArrayList.get(0).getTime_ms() / 1000;
             Log.d("cronovo", "" + value1 + " " + value2);
-            Log.d("cronovo", "" + userDetailsArrayList.get(1).getTime_sec()+" "+userDetailsArrayList.get(1).getTime_ms());
+            Log.d("cronovo", "" + userDetailsArrayList.get(1).getTime_sec() + " " + userDetailsArrayList.get(1).getTime_ms());
 
             result = ((value1 - value2) * 1000);
             return Math.round(result);
         }
     }
 
-    public static double calculateHRV(DataBase dataBase) {
+    static double calculateHRV(DataBase dataBase) {
         ArrayList<UserDetails> userDetailsArrayList = dataBase.getUserDetails(DataBase.readQueryHRV);
         ArrayList<Integer> rriValues = Helper.returnRRiValues(userDetailsArrayList);
         ArrayList<Integer> rriDiff = Helper.returnRRiDiff(rriValues);
         double diffSquare = Helper.calculateDiffSquare(rriDiff);
         double result = Math.sqrt(diffSquare);
-        Log.d("cronovo","HRV"+result);
+        Log.d("cronovo", "HRV" + result);
         return result;
     }
 }

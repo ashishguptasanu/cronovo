@@ -6,7 +6,7 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 
-public class Helper {
+class Helper {
 
     static double calculateAverageCadence(ArrayList<UserDetails> userDetailsArrayList) {
         double total_cadence = 0;

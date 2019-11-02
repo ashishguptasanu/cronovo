@@ -33,7 +33,7 @@ public class DataBase extends SQLiteOpenHelper {
     private static final String COLUMN_DATE = "date";
 
     // Create user table SQL query
-    public static final String CREATE_USER_DETAILS_TABLE =
+    private static final String CREATE_USER_DETAILS_TABLE =
             "CREATE TABLE " + TABLE_USER_DETAILS + "("
                     + COLUMN_ID + " INTEGER PRIMARY KEY AUTOINCREMENT,"
                     + COLUMN_SIGNAL + " INTEGER,"
@@ -48,8 +48,10 @@ public class DataBase extends SQLiteOpenHelper {
                     + COLUMN_DATE + " TEXT"
                     + ")";
 
-    public static String readQueryRRi = "SELECT * FROM (SELECT * FROM user_details ORDER BY id DESC LIMIT 2) SUB ORDER BY id ASC";
+    // SQL query to read data for RRI calculation
+    static String readQueryRRi = "SELECT * FROM (SELECT * FROM user_details ORDER BY id DESC LIMIT 2) SUB ORDER BY id ASC";
 
+    // SQL query to read data for HRV calculation
     static String readQueryHRV = "SELECT * FROM (SELECT * FROM user_details ORDER BY id DESC LIMIT 10) sub ORDER BY id ASC";
 
     public static synchronized DataBase getInstance(Context context) {
@@ -71,9 +73,7 @@ public class DataBase extends SQLiteOpenHelper {
 
     @Override
     public void onCreate(SQLiteDatabase db) {
-        //db.execSQL(CREATE_USER_TABLE);
         db.execSQL(CREATE_USER_DETAILS_TABLE);
-
     }
 
     @Override
@@ -84,7 +84,7 @@ public class DataBase extends SQLiteOpenHelper {
     }
 
     //function to insert user details in database
-    public long insertUserDetails(long signal, long hrm, long time_sec, long time_milli_sec, long cadence, long steps, long vo2, long calories, long entry_time, String date) {
+    long insertUserDetails(long signal, long hrm, long time_sec, long time_milli_sec, long cadence, long steps, long vo2, long calories, long entry_time, String date) {
         // get writable database as we want to write data
         SQLiteDatabase db = getWritableDatabase();
 
@@ -113,10 +113,11 @@ public class DataBase extends SQLiteOpenHelper {
         return id;
     }
 
-    public ArrayList<UserDetails> getUserDetails(long from, long to) {
+    //function to read user details between two entry time stored in database
+    ArrayList<UserDetails> getUserDetails(long from, long to) {
         // get readable database as we are not inserting anything
         SQLiteDatabase db = this.getReadableDatabase();
-        ArrayList<UserDetails> tags = new ArrayList<>();
+        ArrayList<UserDetails> userDetailsArrayList = new ArrayList<>();
 
         Cursor cursor = db.rawQuery("SELECT * FROM " + TABLE_USER_DETAILS +
                 " WHERE " + COLUMN_ENTRY_TIME +
@@ -138,22 +139,20 @@ public class DataBase extends SQLiteOpenHelper {
                 user_details.setDate(cursor.getString((cursor.getColumnIndex(COLUMN_DATE))));
                 //19 column
                 // adding to tags list
-                tags.add(user_details);
+                userDetailsArrayList.add(user_details);
             } while (cursor.moveToNext());
         }
-
-
         // close the db connection
         cursor.close();
-
-        return tags;
+        db.close();
+        return userDetailsArrayList;
     }
 
-
-    public ArrayList<UserDetails> getUserDetails() {
+    //function to read all user detail stored in database
+    ArrayList<UserDetails> getUserDetails() {
         // get readable database as we are not inserting anything
         SQLiteDatabase db = this.getReadableDatabase();
-        ArrayList<UserDetails> tags = new ArrayList<>();
+        ArrayList<UserDetails> userDetailsArrayList = new ArrayList<>();
         String selectQuery = "SELECT  * FROM " + TABLE_USER_DETAILS;
 
         Cursor cursor = db.rawQuery(selectQuery, null);
@@ -172,17 +171,14 @@ public class DataBase extends SQLiteOpenHelper {
                 user_details.setCadence(cursor.getInt((cursor.getColumnIndex(COLUMN_CADENCE))));
                 user_details.setEntry_time((cursor.getLong((cursor.getColumnIndex(COLUMN_ENTRY_TIME)))));
                 user_details.setDate(cursor.getString((cursor.getColumnIndex(COLUMN_DATE))));
-                //19 column
-                // adding to tags list
-                tags.add(user_details);
+                userDetailsArrayList.add(user_details);
             } while (cursor.moveToNext());
         }
-
-
         // close the db connection
         cursor.close();
+        db.close();
 
-        return tags;
+        return userDetailsArrayList;
     }
 
 
@@ -193,8 +189,8 @@ public class DataBase extends SQLiteOpenHelper {
         db.close();
     }
 
-
-    public ArrayList<UserDetails> getUserMinHrDetails(String date) {
+    //function to read user details where HR is min
+    ArrayList<UserDetails> getUserMinHrDetails(String date) {
         SQLiteDatabase db = getWritableDatabase();
         ArrayList<UserDetails> userDetails = new ArrayList<>();
         // "SELECT * FROM Cronovo_DB WHERE date='\(date)' AND hrm = (SELECT MIN(hrm) FROM Cronovo_DB)"
@@ -218,12 +214,13 @@ public class DataBase extends SQLiteOpenHelper {
                 userDetails.add(user_details);
             } while (cursor.moveToNext());
         }
-        while (cursor.moveToNext()) ;
 
+        cursor.close();
+        db.close();
         return userDetails;
     }
 
-    public ArrayList<UserDetails> getUserMaxHrDetails(String date) {
+    ArrayList<UserDetails> getUserMaxHrDetails(String date) {
         SQLiteDatabase db = getWritableDatabase();
         ArrayList<UserDetails> userDetails = new ArrayList<>();
         // "SELECT * FROM Cronovo_DB WHERE date='\(date)' AND hrm = (SELECT MIN(hrm) FROM Cronovo_DB)"
@@ -247,17 +244,15 @@ public class DataBase extends SQLiteOpenHelper {
                 userDetails.add(user_details);
             } while (cursor.moveToNext());
         }
-        while (cursor.moveToNext()) ;
-
+        cursor.close();
+        db.close();
         return userDetails;
     }
 
-    public ArrayList<UserDetails> getUserDetails(String selectQuery) {
+    ArrayList<UserDetails> getUserDetails(String selectQuery) {
         // get readable database as we are not inserting anything
         SQLiteDatabase db = this.getReadableDatabase();
-        ArrayList<UserDetails> tags = new ArrayList<>();
-       // String selectQuery = "SELECT  * FROM " + TABLE_USER_DETAILS;
-
+        ArrayList<UserDetails> userDetailsArrayList = new ArrayList<>();
         Cursor cursor = db.rawQuery(selectQuery, null);
 
         if (cursor.moveToFirst()) {
@@ -274,17 +269,13 @@ public class DataBase extends SQLiteOpenHelper {
                 user_details.setCadence(cursor.getInt((cursor.getColumnIndex(COLUMN_CADENCE))));
                 user_details.setEntry_time((cursor.getLong((cursor.getColumnIndex(COLUMN_ENTRY_TIME)))));
                 user_details.setDate(cursor.getString((cursor.getColumnIndex(COLUMN_DATE))));
-                //19 column
-                // adding to tags list
-                tags.add(user_details);
+                userDetailsArrayList.add(user_details);
             } while (cursor.moveToNext());
         }
-
-
         // close the db connection
         cursor.close();
-
-        return tags;
+        db.close();
+        return userDetailsArrayList;
     }
 
 
