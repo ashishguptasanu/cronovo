@@ -2,8 +2,10 @@ package com.amit.cronovolibrary;
 
 import android.util.Log;
 
+import java.lang.reflect.Array;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Date;
 
 class Helper {
@@ -94,5 +96,44 @@ class Helper {
         }
         double diffSquare = total / data.size() - 1;
         return diffSquare;
+    }
+
+    static ArrayList<Double> calculateHeartRateAtZone(double HRR, double HRRest, Cronovo.HeartZone Zone){
+        ArrayList<Double> result = new ArrayList<>();
+        double zoneMin = Zone.getHeartZone() / 100;
+        double zoneMax = (Zone.getHeartZone() + 10) / 100;
+
+        double HRAtZoneMin = (zoneMin * HRR) + HRRest;
+        double HRAtZoneMax = (zoneMax * HRR) + HRRest;
+
+        result.addAll(Arrays.asList(HRAtZoneMin, HRAtZoneMax));
+        return result;
+    }
+
+    static long findEpochDiff(Long Start, Long Stop){
+        long minutes = Math.abs(Stop - Start) / 60;
+        return minutes;
+    }
+
+    static ArrayList<Double> calculateZoneData(DataBase database, Integer Age){
+        ArrayList<Double> result = new ArrayList<>();
+        double maxHR = 207 - (Age * 0.7);
+//        double HRRest = calculateRestingHr(dataBase);
+////        if (HRRest == 0){
+////            HRRest = 70;
+////        }
+        double HRRest = 70;
+        double HRR = maxHR - HRRest;
+        double zoneValueModerate = calculateHeartZone(HRR, HRRest, 50);
+        double zoneValueIntense = calculateHeartZone(HRR, HRRest, 70);
+        result.addAll(Arrays.asList(zoneValueModerate, zoneValueIntense));
+        return result;
+
+    }
+
+    static double calculateHeartZone(Double HRR, Double HRRest, Integer Zone){
+        int zone = Zone / 100;
+        double HRAtZone = (Zone * HRR) + HRRest;
+        return HRAtZone;
     }
 }

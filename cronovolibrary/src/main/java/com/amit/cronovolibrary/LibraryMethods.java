@@ -4,6 +4,8 @@ import android.util.Log;
 
 import java.time.Instant;
 import java.util.ArrayList;
+import java.util.Dictionary;
+import java.util.Hashtable;
 
 class LibraryMethods {
     private static double previousCT = 37;
@@ -30,7 +32,7 @@ class LibraryMethods {
     static double calculateHeartRateRecovery(Cronovo.RecoveryTime recoveryTime, DataBase dataBase) {
         Log.d("cronovo", "time" + recoveryTime.getRecoveryTime());
         String currentDate = Helper.getCurrentDate();
-        double heart_rate_recovery = 0;
+        double heart_rate_recovery;
         ArrayList<UserDetails> minHRArrayList = dataBase.getUserMinHrDetails(currentDate);
         ArrayList<UserDetails> maxHRArrayList = dataBase.getUserMaxHrDetails(currentDate);
         if (maxHRArrayList.size() == 0) {
@@ -73,21 +75,20 @@ class LibraryMethods {
         if (userDetailsArrayList.size() == 0) {
             Log.d("cronovo", "insufficient data");
             return -1;
-        } else
+        } else {
             return Helper.calculateRestingHr(userDetailsArrayList);
-
+        }
     }
 
     static double calculateCoreTemperature(DataBase dataBase) {
         long to = Instant.now().getEpochSecond();
         long from = to - 60;
-        double CoreTemp = 0;
+        double CoreTemp;
         ArrayList<UserDetails> userDetailsArrayList = dataBase.getUserDetails(from, to);
         Log.d("cronovo", "userDtl" + userDetailsArrayList);
         if (userDetailsArrayList.size() == 0) {
             Log.d("cronovo", "insufficient data");
             CoreTemp = -1;
-
         } else {
             double averageHR = Helper.calculateAverageHR(userDetailsArrayList);
             Log.d("cronovo", "hr" + averageHR);
@@ -119,9 +120,9 @@ class LibraryMethods {
     static double calculateVO2MAX(DataBase dataBase) {
         double vo2_max;
         double hr_rest = LibraryMethods.calculateRestingHr(dataBase);
-        if (hr_rest == -1)
+        if (hr_rest == -1) {
             vo2_max = -1;
-        else {
+        } else {
             String currentDate = Helper.getCurrentDate();
             ArrayList<UserDetails> maxHRArrayList = dataBase.getUserMaxHrDetails(currentDate);
             if (maxHRArrayList.size() == 0)
@@ -130,7 +131,6 @@ class LibraryMethods {
                 double hr_max = maxHRArrayList.get(0).getHrm();
                 vo2_max = 15.3 * (hr_max / hr_rest);
             }
-
         }
         return vo2_max;
     }
@@ -138,9 +138,9 @@ class LibraryMethods {
     static double calculateRRI(DataBase dataBase) {
         double result;
         ArrayList<UserDetails> userDetailsArrayList = dataBase.getUserDetails(DataBase.readQueryRRi);
-        if (userDetailsArrayList.size() == 0)
+        if (userDetailsArrayList.size() == 0) {
             return -1;
-        else {
+        } else {
             double value1 = userDetailsArrayList.get(1).getTime_sec() + (double) userDetailsArrayList.get(1).getTime_ms() / 1000;
             double value2 = userDetailsArrayList.get(0).getTime_sec() + (double) userDetailsArrayList.get(0).getTime_ms() / 1000;
             Log.d("cronovo", "" + value1 + " " + value2);
@@ -159,5 +159,51 @@ class LibraryMethods {
         double result = Math.sqrt(diffSquare);
         Log.d("cronovo", "HRV" + result);
         return result;
+    }
+
+    static String calculateHeartRateZoneValues(DataBase dataBase, Integer Age, Cronovo.HeartZone heartZone) {
+        Log.d("cronovo", "heartZone" + heartZone.getHeartZone());
+        double maxHR = 207 - (Age * 0.7);
+        double HRRest = calculateRestingHr(dataBase);
+        if (HRRest == 0) {
+            HRRest = 70;
+        }
+        double HRR = maxHR - HRRest;
+        ArrayList<Double> zoneValues = Helper.calculateHeartRateAtZone(HRR, HRRest, heartZone);
+        String minVal = String.valueOf(zoneValues.get(0));
+        String maxVal = String.valueOf(zoneValues.get(1));
+        return minVal + "-" + maxVal;
+    }
+
+    static Dictionary calculateTrainingEffect(DataBase dataBase, Integer Age, Long StartTime, Long StopTime) {
+        long diff = Helper.findEpochDiff(StartTime, StopTime);
+        int modCount = 0;
+        int intenseCount = 0;
+        ArrayList<Double> zoneValues = Helper.calculateZoneData(dataBase, Age);
+        ArrayList<UserDetails> dataValues = dataBase.getUserDetails(StartTime, StopTime);
+        for (int i = 0; i < dataValues.size(); i++) {
+            long HR = dataValues.get(i).getHrm();
+            if (HR > zoneValues.get(0) && HR < zoneValues.get(1)) {
+                modCount += 1;
+            } else if (HR > zoneValues.get(1)) {
+                intenseCount += 1;
+            }
+        }
+        double modPer = (modCount / dataValues.size()) * 100;
+        double modTime = (modPer / 100) * diff;
+        double intensePer = (intenseCount / dataValues.size()) * 100;
+        double intenseTime = (intensePer / 100) * diff;
+        double totalTime = modTime + (intenseTime * 2);
+        Dictionary dict = new Hashtable();
+        if (totalTime > 50) {
+            dict.put("modTime", modTime);
+            dict.put("intenseTime", intenseTime);
+            dict.put("Result", "Daily Target Achieved");
+        } else {
+            dict.put("modTime", modTime);
+            dict.put("intenseTime", intenseTime);
+            dict.put("Result", "Too Lazy!!");
+        }
+        return dict;
     }
 }

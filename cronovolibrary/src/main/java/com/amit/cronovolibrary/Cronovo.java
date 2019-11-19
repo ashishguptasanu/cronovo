@@ -4,6 +4,7 @@ import android.content.Context;
 import android.util.Log;
 
 import java.util.ArrayList;
+import java.util.Dictionary;
 
 public class Cronovo {
     public double getCardiacEfficiency(Cronovo.TimePeriod timePeriod, Context context) {
@@ -36,6 +37,18 @@ public class Cronovo {
     public double getRRI(Context context) {
         DataBase dataBase = DataBase.getInstance(context);
         return LibraryMethods.calculateRRI(dataBase);
+    }
+
+    public String heartRateZone(Context context, Integer Age, Cronovo.HeartZone Zone) {
+        DataBase dataBase = DataBase.getInstance(context);
+        String data = LibraryMethods.calculateHeartRateZoneValues(dataBase, Age, Zone);
+        return data;
+    }
+
+    public Dictionary trainingEffect(Context context, Integer Age, Long StartTime, Long StopTime){
+        DataBase dataBase = DataBase.getInstance(context);
+        Dictionary data = LibraryMethods.calculateTrainingEffect(dataBase, Age, StartTime, StopTime);
+        return data;
     }
 
     /*public void saveUserDetails(long signal, long hrm, long time_sec, long time_milli_sec, long cadence, long steps, long vo2, long calories, Context context) {
@@ -80,7 +93,7 @@ public class Cronovo {
     }
 
     public enum TimePeriod {
-        DAILY(86400), WEEKLY(604800), MONTHLY(2678400), ALLTIME(0);
+        ALLTIME(0), DAILY(86400), MONTHLY(2678400), WEEKLY(604800);
 
         private final long i;
 
@@ -106,4 +119,12 @@ public class Cronovo {
         }
     }
 
+    public enum HeartZone {
+        Zone1(50), Zone2(60), Zone3(70), Zone4(80), Zone(90);
+        private  final long i;
+
+
+        HeartZone(long i) { this.i = i;}
+        public long getHeartZone() {return  i;}
+    }
 }
